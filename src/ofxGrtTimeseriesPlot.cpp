@@ -178,6 +178,25 @@ bool ofxGrtTimeseriesPlot::setData( const Matrix<float> &data ){
     return true;
 }
 
+bool ofxGrtTimeseriesPlot::setData( const Matrix<double> &data ){
+    
+    const unsigned int M = data.getNumRows();
+    const unsigned int N = data.getNumCols();
+    
+    if( N != numDimensions ){
+        errorLog << "setData( const MatrixFloat &data ) - The number of dimensions in the data does not match the number of dimensions in the graph!" << endl;
+        return false;
+    }
+    
+    dataBuffer.reset();
+    
+    for(unsigned int i=0; i<M; i++){
+        update( data.getRowVector(i) );
+    }
+    
+    return true;
+}
+
 bool ofxGrtTimeseriesPlot::update(){
     
     //If the buffer has not been initialised then return false, otherwise update the buffer
