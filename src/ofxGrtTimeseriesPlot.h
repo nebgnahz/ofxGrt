@@ -1,20 +1,20 @@
 /*
  GRT MIT License
  Copyright (c) <2012> <Nicholas Gillian, Media Lab, MIT>
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
- and associated documentation files (the "Software"), to deal in the Software without restriction, 
- including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ and associated documentation files (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
  subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all copies or substantial 
+
+ The above copyright notice and this permission notice shall be included in all copies or substantial
  portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
- LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
- IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
- WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+ LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
@@ -28,7 +28,7 @@ class ofxGrtTimeseriesPlot{
 public:
     ofxGrtTimeseriesPlot();
     ~ofxGrtTimeseriesPlot();
-    
+
     /**
      @brief setups a plot, setting the length of the timeseries (the number of points that will be stored in the plots internal buffer) and
      the number of dimensions in the data.
@@ -45,13 +45,13 @@ public:
      @return returns true if the plot was updated successfully, false otherwise
     */
     bool update();
-    
+
     /**
      @brief updates the plot pushing the input data into the plots internal buffer. The size of the input Vector must match the number of dimensions in the plot.
      @return returns true if the plot was updated successfully, false otherwise
     */
     bool update( const vector<float> &data );
-    
+
     /**
      @brief updates the plot pushing the input data into the plots internal buffer. The size of the input Vector must match the number of dimensions in the plot.
      @return returns true if the plot was updated successfully, false otherwise
@@ -59,11 +59,11 @@ public:
     bool update( const vector<double> &data );
 
     /**
-     @brief draws the plot.     
+     @brief draws the plot.
      @return returns true if the plot was drawn successfully, false otherwise
     */
     bool draw(unsigned int x,unsigned int y,unsigned int w,unsigned int h);
-    
+
     bool reset();
     bool setData( const vector<float> &data );
     bool setData( const vector<double> &data );
@@ -75,6 +75,14 @@ public:
     bool setFont( const ofTrueTypeFont &font ){ this->font = &font; return this->font->isLoaded(); }
     bool setLockRanges(bool lockRanges){ this->lockRanges = lockRanges; return true; }
     bool setDrawInfoText(bool drawInfoText){ this->drawInfoText = drawInfoText; return true; }
+    bool setColorPalette(const vector<ofColor> &colors) {
+        if (colors.size() == numDimensions) {
+            this->colors = colors;
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      @brief gets the range information.
@@ -91,20 +99,18 @@ protected:
     vector< std::string > channelNames;
     vector< bool > channelVisible;
     CircularBuffer< vector<float> > dataBuffer;
-    
+
     bool initialized;
     bool lockRanges;
     bool constrainValuesToGraph;
     bool drawInfoText;
     bool drawGrid;
-    
+
     ofColor textColor;
     ofColor gridColor;
     ofColor backgroundColor;
     vector< ofColor > colors;
     ErrorLog errorLog;
     const ofTrueTypeFont *font;
-    
+
 };
-
-
