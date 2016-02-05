@@ -288,7 +288,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             if( channelVisible[n] ){
                 ofSetColor( colors[n][0],colors[n][1],colors[n][2] );
                 ofBeginShape();
-                for(unsigned int i=0; i<timeseriesLength; i++){
+                for(unsigned int i=0; i<dataBuffer.getNumValuesInBuffer(); i++){
                     ofVertex( xPos, ofMap(dataBuffer[i][n], lockRanges ? defaultMinY : minY, lockRanges ? defaultMaxY : maxY, h, 0, constrainValuesToGraph) );
                     xPos += xStep;
                 }
