@@ -7,8 +7,8 @@ ofxGrtTimeseriesPlot::ofxGrtTimeseriesPlot(){
     font = NULL;
     initialized = false;
     lockRanges = false;
-    minY = 0;
-    maxY = 0;
+    minY = 0; defaultMinY = 0;
+    maxY = 0; defaultMaxY = 0;
     constrainValuesToGraph = true;
     drawInfoText = false;
     drawGrid = false;    
@@ -49,8 +49,8 @@ bool ofxGrtTimeseriesPlot::setup(unsigned int timeseriesLength,unsigned int numD
         dataBuffer.push_back(vector<float>(numDimensions,0));
     
     lockRanges = false;
-    minY = 0;
-    maxY = 0;
+    minY = 0; defaultMinY = 0;
+    maxY = 0; defaultMaxY = 0;
     channelNames.resize(numDimensions,"");
     
     colors.resize(numDimensions);
@@ -75,10 +75,9 @@ bool ofxGrtTimeseriesPlot::reset(){
         
     if( !initialized ) return false;
     
-    if( !lockRanges ){
-        minY = 0;
-        maxY = 0;
-    }
+    // reset minY and maxY (derived from data) but not defaultMinY and defaultMaxY (specified by user)
+    minY = 0;
+    maxY = 0;
 
     //Clear the buffer
     dataBuffer.setAllValues(vector<float>(numDimensions,0));
@@ -90,8 +89,8 @@ bool ofxGrtTimeseriesPlot::setRanges(float minY,float maxY,bool lockRanges){
     if( minY == maxY ){
         return false;
     }
-    this->minY = minY;
-    this->maxY = maxY;
+    this->defaultMinY = this->minY = minY;
+    this->defaultMaxY = this->maxY = maxY;
     this->lockRanges = lockRanges;
     return true;
 }
@@ -109,10 +108,8 @@ bool ofxGrtTimeseriesPlot::setData( const vector<float> &data ){
         dataBuffer(i)[0] = data[i];
 
         //Check the min and max values
-        if( !lockRanges ){
-            if( data[i] < minY ){ minY = data[i]; }
-            else if( data[i] > maxY ){ maxY = data[i]; }
-        }
+        if( data[i] < minY ){ minY = data[i]; }
+        else if( data[i] > maxY ){ maxY = data[i]; }
     }
 
     return true;
@@ -131,10 +128,8 @@ bool ofxGrtTimeseriesPlot::setData( const vector<double> &data ){
         dataBuffer(i)[0] = data[i];
 
         //Check the min and max values
-        if( !lockRanges ){
-            if( data[i] < minY ){ minY = data[i]; }
-            else if( data[i] > maxY ){ maxY = data[i]; }
-        }
+        if( data[i] < minY ){ minY = data[i]; }
+        else if( data[i] > maxY ){ maxY = data[i]; }
     }
 
     return true;
@@ -219,11 +214,9 @@ bool ofxGrtTimeseriesPlot::update( const vector<float> &data ){
     dataBuffer.push_back( data );
     
     //Check the min and max values
-    if( !lockRanges ){
-        for(unsigned int n=0; n<numDimensions; n++){
-            if( data[n] < minY ){ minY = data[n]; }
-            else if( data[n] > maxY ){ maxY = data[n]; }
-        }
+    for(unsigned int n=0; n<numDimensions; n++){
+        if( data[n] < minY ){ minY = data[n]; }
+        else if( data[n] > maxY ){ maxY = data[n]; }
     }
     
     return true;
@@ -284,7 +277,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
     ofDrawLine(0,-5,0,h+5); //Y Axis
    
     //Draw the timeseries
-    if( minY != maxY ){
+    if( (lockRanges && defaultMinY != defaultMaxY) || (!lockRanges && minY != maxY) ){
         float xPos = 0;
         float xStep = w / (float)timeseriesLength;
         unsigned int index = 0;
@@ -296,7 +289,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
                 ofSetColor( colors[n][0],colors[n][1],colors[n][2] );
                 ofBeginShape();
                 for(unsigned int i=0; i<timeseriesLength; i++){
-                    ofVertex( xPos, ofMap(dataBuffer[i][n], minY, maxY, h, 0, constrainValuesToGraph) );
+                    ofVertex( xPos, ofMap(dataBuffer[i][n], lockRanges ? defaultMinY : minY, lockRanges ? defaultMaxY : maxY, h, 0, constrainValuesToGraph) );
                     xPos += xStep;
                 }
                 ofEndShape(false);

@@ -85,16 +85,21 @@ public:
     }
 
     /**
-     @brief gets the range information.
+     @brief gets the range information of the actual plot data.
      @returns returns the range information (minimum to maximum) in std::pair.
     */
     std::pair<float, float> getRanges() { return std::make_pair(minY, maxY); }
+    /**
+     @brief gets the range information specified by the user in the call to setRanges()
+     @returns returns the range information (minimum to maximum) in std::pair.
+    */
+    std::pair<float, float> getDefaultRanges() { return std::make_pair(defaultMinY, defaultMaxY); }
 
 protected:
     unsigned int numDimensions;
     unsigned int timeseriesLength;
-    float minY;
-    float maxY;
+    float minY, defaultMinY; // minY is the minimum of the actual data, defaultMinY is the user-specified value, used if lockRanges is true.
+    float maxY, defaultMaxY; // ditto.
     std::string plotTitle;
     vector< std::string > channelNames;
     vector< bool > channelVisible;
