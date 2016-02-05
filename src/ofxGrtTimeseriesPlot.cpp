@@ -348,6 +348,20 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             ofDrawBitmapString( plotTitle, textX, textY );
             textY += textSpacer;
         }
+        
+        if( drawInfoText ){
+            std::stringstream info;
+            for(unsigned int n=0; n<numDimensions; n++){
+                if( channelVisible[n] ){
+                    ofSetColor(colors[n][0],colors[n][1],colors[n][2]);
+                    info.str("");
+                    info << "[" << n+1 << "]: " << channelNames[n] << " ";
+                    info << dataBuffer[timeseriesLength-1][n] << " [" << minY << " " << maxY << "]" << endl;
+                    ofDrawBitmapString(info.str(),textX,textY);
+                    textY += ofBitmapFontHeight + 5;
+                }
+            }
+        }
     }
 
     ofPopMatrix();
