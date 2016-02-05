@@ -89,8 +89,8 @@ bool ofxGrtTimeseriesPlot::setRanges(float minY,float maxY,bool lockRanges){
     if( minY == maxY ){
         return false;
     }
-    this->defaultMinY = this->minY = minY;
-    this->defaultMaxY = this->maxY = maxY;
+    this->defaultMinY = minY;
+    this->defaultMaxY = maxY;
     this->lockRanges = lockRanges;
     return true;
 }
@@ -102,7 +102,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector<float> &data ){
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
-    dataBuffer.reset();
+    dataBuffer.reset(); minY = 0; maxY = 0;
     
     for(unsigned int i=0; i<M; i++){
         dataBuffer(i)[0] = data[i];
@@ -122,7 +122,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector<double> &data ){
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
-    dataBuffer.reset();
+    dataBuffer.reset(); minY = 0; maxY = 0;
     
     for(unsigned int i=0; i<M; i++){
         dataBuffer(i)[0] = data[i];
@@ -142,7 +142,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector< vector<float> > &data ){
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
-    dataBuffer.reset();
+    dataBuffer.reset(); minY = 0; maxY = 0;
     
     for(unsigned int i=0; i<M; i++){
         if( data[i].size() != numDimensions ){
@@ -164,7 +164,7 @@ bool ofxGrtTimeseriesPlot::setData( const Matrix<float> &data ){
         return false;
     }
     
-    dataBuffer.reset();
+    dataBuffer.reset(); minY = 0; maxY = 0;
     
     for(unsigned int i=0; i<M; i++){
         update( data.getRowVector(i) );
@@ -183,7 +183,7 @@ bool ofxGrtTimeseriesPlot::setData( const Matrix<double> &data ){
         return false;
     }
     
-    dataBuffer.reset();
+    dataBuffer.reset(); minY = 0; maxY = 0;
     
     for(unsigned int i=0; i<M; i++){
         update( data.getRowVector(i) );
