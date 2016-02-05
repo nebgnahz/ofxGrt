@@ -337,6 +337,17 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
                 }
             }
         }
+    } else {
+        int ofBitmapFontHeight = 14;
+        int textX = 10;
+        int textY = ofBitmapFontHeight + 5;
+        int textSpacer = ofBitmapFontHeight + 5;
+
+        if( plotTitle != "" ){
+            ofSetColor(textColor[0],textColor[1],textColor[2]);
+            ofDrawBitmapString( plotTitle, textX, textY );
+            textY += textSpacer;
+        }
     }
 
     ofPopMatrix();
