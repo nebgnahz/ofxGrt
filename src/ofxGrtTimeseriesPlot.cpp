@@ -1,7 +1,7 @@
 #include "ofxGrtTimeseriesPlot.h"
 
 using namespace GRT;
-    
+
 ofxGrtTimeseriesPlot::ofxGrtTimeseriesPlot(){
     plotTitle = "";
     font = NULL;
@@ -11,7 +11,7 @@ ofxGrtTimeseriesPlot::ofxGrtTimeseriesPlot(){
     maxY = 0; defaultMaxY = 0;
     constrainValuesToGraph = true;
     drawInfoText = false;
-    drawGrid = false;    
+    drawGrid = false;
     textColor[0] = 225;
     textColor[1] = 225;
     textColor[2] = 225;
@@ -22,7 +22,7 @@ ofxGrtTimeseriesPlot::ofxGrtTimeseriesPlot(){
     gridColor[1] = 255;
     gridColor[2] = 255;
     gridColor[3] = 100;
-    
+
     errorLog.setProceedingText("[ERROR ofxGrtTimeseriesPlot]");
 }
 
@@ -30,29 +30,29 @@ ofxGrtTimeseriesPlot::~ofxGrtTimeseriesPlot(){
 }
 
 bool ofxGrtTimeseriesPlot::setup(unsigned int timeseriesLength,unsigned int numDimensions,std::string title){
-    
+
     initialized = false;
-    
+
     //Cleanup the old memory
     dataBuffer.clear();
-    
+
     if( timeseriesLength == 0 || numDimensions == 0 ) return false;
-    
+
     //Setup the memory for the new buffer
     this->timeseriesLength = timeseriesLength;
     this->numDimensions = numDimensions;
     this->plotTitle = title;
     dataBuffer.resize(timeseriesLength, vector<float>(numDimensions,0));
-    
+
     //Fill the buffer with empty values
     for(unsigned int i=0; i<timeseriesLength; i++)
         dataBuffer.push_back(vector<float>(numDimensions,0));
-    
+
     lockRanges = false;
     minY = 0; defaultMinY = 0;
     maxY = 0; defaultMaxY = 0;
     channelNames.resize(numDimensions,"");
-    
+
     colors.resize(numDimensions);
     //Setup the default colors
     if( numDimensions >= 1 ) colors[0] = ofColor(255,0,0); //red
@@ -67,24 +67,24 @@ bool ofxGrtTimeseriesPlot::setup(unsigned int timeseriesLength,unsigned int numD
 
     channelVisible.resize(numDimensions,true);
     initialized = true;
-    
-    return true;    
+
+    return true;
 }
 
 bool ofxGrtTimeseriesPlot::reset(){
-        
+
     if( !initialized ) return false;
-    
+
     // reset minY and maxY (derived from data) but not defaultMinY and defaultMaxY (specified by user)
     minY = 0;
     maxY = 0;
 
     //Clear the buffer
     dataBuffer.setAllValues(vector<float>(numDimensions,0));
-    
+
     return true;
 }
-    
+
 bool ofxGrtTimeseriesPlot::setRanges(float minY,float maxY,bool lockRanges){
     if( minY == maxY ){
         return false;
@@ -103,7 +103,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector<float> &data ){
     if( M != timeseriesLength ) return false;
 
     dataBuffer.reset(); minY = 0; maxY = 0;
-    
+
     for(unsigned int i=0; i<M; i++){
         dataBuffer(i)[0] = data[i];
 
@@ -123,9 +123,13 @@ bool ofxGrtTimeseriesPlot::setData( const vector<double> &data ){
     if( M != timeseriesLength ) return false;
 
     dataBuffer.reset(); minY = 0; maxY = 0;
-    
+
     for(unsigned int i=0; i<M; i++){
-        dataBuffer(i)[0] = data[i];
+        // The old code doesn't update number of values tracked by circular
+        // buffer. Use push_back instead.
+        // old code: dataBuffer(i)[0] = data[i];
+        std::vector<float> point { (float) data[i] };
+        dataBuffer.push_back(point);
 
         //Check the min and max values
         if( data[i] < minY ){ minY = data[i]; }
@@ -134,93 +138,93 @@ bool ofxGrtTimeseriesPlot::setData( const vector<double> &data ){
 
     return true;
 }
-    
+
 bool ofxGrtTimeseriesPlot::setData( const vector< vector<float> > &data ){
-    
+
     const unsigned int M = (unsigned int)data.size();
 
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
     dataBuffer.reset(); minY = 0; maxY = 0;
-    
+
     for(unsigned int i=0; i<M; i++){
         if( data[i].size() != numDimensions ){
             return false;
         }
         update( data[i] );
     }
-    
+
     return true;
 }
-    
+
 bool ofxGrtTimeseriesPlot::setData( const Matrix<float> &data ){
-    
+
     const unsigned int M = data.getNumRows();
     const unsigned int N = data.getNumCols();
-    
+
     if( N != numDimensions ){
         errorLog << "setData( const MatrixFloat &data ) - The number of dimensions in the data does not match the number of dimensions in the graph!" << endl;
         return false;
     }
-    
+
     dataBuffer.reset(); minY = 0; maxY = 0;
-    
+
     for(unsigned int i=0; i<M; i++){
         update( data.getRowVector(i) );
     }
-    
+
     return true;
 }
 
 bool ofxGrtTimeseriesPlot::setData( const Matrix<double> &data ){
-    
+
     const unsigned int M = data.getNumRows();
     const unsigned int N = data.getNumCols();
-    
+
     if( N != numDimensions ){
         errorLog << "setData( const MatrixFloat &data ) - The number of dimensions in the data does not match the number of dimensions in the graph!" << endl;
         return false;
     }
-    
+
     dataBuffer.reset(); minY = 0; maxY = 0;
-    
+
     for(unsigned int i=0; i<M; i++){
         update( data.getRowVector(i) );
     }
-    
+
     return true;
 }
 
 bool ofxGrtTimeseriesPlot::update(){
-    
+
     //If the buffer has not been initialised then return false, otherwise update the buffer
     if( !initialized ) return false;
-    
+
     //Repeat the previos value
     dataBuffer.push_back( dataBuffer[timeseriesLength-1] );
-    
+
     return true;
 }
 
 bool ofxGrtTimeseriesPlot::update( const vector<float> &data ){
 
     const unsigned int N = data.size();
-    
+
     //If the buffer has not been initialised then return false, otherwise update the buffer
     if( !initialized || N != numDimensions ) return false;
-    
+
     //Add the new value to the buffer
     dataBuffer.push_back( data );
-    
+
     //Check the min and max values
     for(unsigned int n=0; n<numDimensions; n++){
         if( data[n] < minY ){ minY = data[n]; }
         else if( data[n] > maxY ){ maxY = data[n]; }
     }
-    
+
     return true;
-    
+
 }
 
 bool ofxGrtTimeseriesPlot::update( const vector<double> &data ){
@@ -232,26 +236,26 @@ bool ofxGrtTimeseriesPlot::update( const vector<double> &data ){
     }
     return update( tmp );
 }
-    
+
 bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,unsigned int h){
-    
+
     if( !initialized ) return false;
-    
+
     ofPushMatrix();
     ofEnableAlphaBlending();
     ofTranslate(x, y);
-    
+
     //Draw the background
     ofFill();
     ofSetColor(backgroundColor[0],backgroundColor[1],backgroundColor[2]);
     ofDrawRectangle(0,0,w,h);
-    
+
     //Draw the grid if required
     if( drawGrid ){
         ofSetColor(gridColor[0],gridColor[1],gridColor[2],gridColor[3]);
         unsigned int numVLines = 20;
         unsigned int numHLines = 10;
-        
+
         //Draw the horizontal lines
         for(unsigned int i=0; i<numHLines; i++){
             float xStart = 0;
@@ -260,7 +264,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             float yEnd = yStart;
             ofDrawLine(xStart,yStart,xEnd,yEnd);
         }
-        
+
         //Draw the vertical lines
         for(unsigned int i=0; i<numVLines; i++){
             float xStart = ofMap(i,0,numVLines,0,w);
@@ -270,12 +274,12 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             ofDrawLine(xStart,yStart,xEnd,yEnd);
         }
     }
-    
+
     //Draw the axis lines
     ofSetColor(255,255,255);
     ofDrawLine(-5,h,w+5,h); //X Axis
     ofDrawLine(0,-5,0,h+5); //Y Axis
-   
+
     //Draw the timeseries
     if( (lockRanges && defaultMinY != defaultMaxY) || (!lockRanges && minY != maxY) ){
         float xPos = 0;
@@ -304,7 +308,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
     if( font ){
 
         if( !font->isLoaded() ) return false;
-        
+
         ofRectangle bounds = font->getStringBoundingBox(plotTitle, 0, 0);
         int textX = 10;
         int textY = bounds.height + 5;
@@ -315,7 +319,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             font->drawString( plotTitle, textX, textY );
             textY += textSpacer;
         }
-        
+
         if( drawInfoText ){
             std::stringstream info;
             for(unsigned int n=0; n<numDimensions; n++){
@@ -341,7 +345,7 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             ofDrawBitmapString( plotTitle, textX, textY );
             textY += textSpacer;
         }
-        
+
         if( drawInfoText ){
             std::stringstream info;
             for(unsigned int n=0; n<numDimensions; n++){
@@ -358,9 +362,6 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
     }
 
     ofPopMatrix();
-    
+
     return true;
 }
-
-
-
