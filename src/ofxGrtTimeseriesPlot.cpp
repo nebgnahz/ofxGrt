@@ -35,6 +35,8 @@ bool ofxGrtTimeseriesPlot::setup(unsigned int timeseriesLength,unsigned int numD
 
     //Cleanup the old memory
     dataBuffer.clear();
+    highlightBuffer.clear();
+    labelBuffer.clear();
 
     if( timeseriesLength == 0 || numDimensions == 0 ) return false;
 
@@ -43,10 +45,15 @@ bool ofxGrtTimeseriesPlot::setup(unsigned int timeseriesLength,unsigned int numD
     this->numDimensions = numDimensions;
     this->plotTitle = title;
     dataBuffer.resize(timeseriesLength, vector<float>(numDimensions,0));
+    highlightBuffer.resize(timeseriesLength, 0);
+    labelBuffer.resize(timeseriesLength, "");
 
     //Fill the buffer with empty values
-    for(unsigned int i=0; i<timeseriesLength; i++)
+    for(unsigned int i=0; i<timeseriesLength; i++) {
         dataBuffer.push_back(vector<float>(numDimensions,0));
+        highlightBuffer.push_back(0);
+        labelBuffer.push_back("");
+    }
 
     lockRanges = false;
     minY = 0; defaultMinY = 0;
@@ -81,6 +88,8 @@ bool ofxGrtTimeseriesPlot::reset(){
 
     //Clear the buffer
     dataBuffer.setAllValues(vector<float>(numDimensions,0));
+    highlightBuffer.setAllValues(0);
+    labelBuffer.setAllValues("");
 
     return true;
 }
@@ -102,7 +111,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector<float> &data ){
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
-    dataBuffer.reset(); minY = 0; maxY = 0;
+    dataBuffer.reset(); highlightBuffer.reset(); labelBuffer.reset(); minY = 0; maxY = 0;
 
     for(unsigned int i=0; i<M; i++){
         dataBuffer(i)[0] = data[i];
@@ -122,7 +131,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector<double> &data ){
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
-    dataBuffer.reset(); minY = 0; maxY = 0;
+    dataBuffer.reset(); highlightBuffer.reset(); labelBuffer.reset(); minY = 0; maxY = 0;
 
     for(unsigned int i=0; i<M; i++){
         // The old code doesn't update number of values tracked by circular
@@ -130,6 +139,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector<double> &data ){
         // old code: dataBuffer(i)[0] = data[i];
         std::vector<float> point { (float) data[i] };
         dataBuffer.push_back(point);
+        highlightBuffer.push_back(0);
 
         //Check the min and max values
         if( data[i] < minY ){ minY = data[i]; }
@@ -146,7 +156,7 @@ bool ofxGrtTimeseriesPlot::setData( const vector< vector<float> > &data ){
     if( numDimensions != 1 ) return false;
     if( M != timeseriesLength ) return false;
 
-    dataBuffer.reset(); minY = 0; maxY = 0;
+    dataBuffer.reset(); highlightBuffer.reset(); labelBuffer.reset(); minY = 0; maxY = 0;
 
     for(unsigned int i=0; i<M; i++){
         if( data[i].size() != numDimensions ){
@@ -168,7 +178,7 @@ bool ofxGrtTimeseriesPlot::setData( const Matrix<float> &data ){
         return false;
     }
 
-    dataBuffer.reset(); minY = 0; maxY = 0;
+    dataBuffer.reset(); highlightBuffer.reset(); labelBuffer.reset(); minY = 0; maxY = 0;
 
     for(unsigned int i=0; i<M; i++){
         update( data.getRowVector(i) );
@@ -187,7 +197,7 @@ bool ofxGrtTimeseriesPlot::setData( const Matrix<double> &data ){
         return false;
     }
 
-    dataBuffer.reset(); minY = 0; maxY = 0;
+    dataBuffer.reset(); highlightBuffer.reset(); labelBuffer.reset(); minY = 0; maxY = 0;
 
     for(unsigned int i=0; i<M; i++){
         update( data.getRowVector(i) );
@@ -203,11 +213,13 @@ bool ofxGrtTimeseriesPlot::update(){
 
     //Repeat the previos value
     dataBuffer.push_back( dataBuffer[timeseriesLength-1] );
+    highlightBuffer.push_back( highlightBuffer[timeseriesLength - 1] );
+    labelBuffer.push_back( labelBuffer[timeseriesLength - 1] );
 
     return true;
 }
 
-bool ofxGrtTimeseriesPlot::update( const vector<float> &data ){
+bool ofxGrtTimeseriesPlot::update( const vector<float> &data, bool highlight, std::string label ){
 
     const unsigned int N = data.size();
 
@@ -216,6 +228,9 @@ bool ofxGrtTimeseriesPlot::update( const vector<float> &data ){
 
     //Add the new value to the buffer
     dataBuffer.push_back( data );
+    highlightBuffer.push_back( highlight );
+    labelBuffer.push_back( label );
+    
 
     //Check the min and max values
     for(unsigned int n=0; n<numDimensions; n++){
@@ -227,14 +242,14 @@ bool ofxGrtTimeseriesPlot::update( const vector<float> &data ){
 
 }
 
-bool ofxGrtTimeseriesPlot::update( const vector<double> &data ){
+bool ofxGrtTimeseriesPlot::update( const vector<double> &data, bool highlight, std::string label ){
 
     const size_t N = data.size();
     vector<float> tmp(N);
     for(size_t i=0; i<N; i++){
         tmp[i] = data[i];
     }
-    return update( tmp );
+    return update( tmp, highlight, label );
 }
 
 bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,unsigned int h){
@@ -284,6 +299,26 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
     if( (lockRanges && defaultMinY != defaultMaxY) || (!lockRanges && minY != maxY) ){
         float xPos = 0;
         float xStep = w / (float)timeseriesLength;
+        ofSetColor(32);
+        for(unsigned int i=0; i<highlightBuffer.getNumValuesInBuffer(); i++){
+            if (highlightBuffer[i]) ofDrawRectangle( xPos, 0, xStep, h );
+            xPos += xStep;
+        }
+        std::string label = "";
+        xPos = 0;
+        ofSetColor(255);
+        ofFill();
+        for(unsigned int i=0; i<highlightBuffer.getNumValuesInBuffer(); i++){
+            if (highlightBuffer[i]) {
+                if (labelBuffer[i] != label) {
+                    ofDrawBitmapString(labelBuffer[i], xPos, h);
+                    label = labelBuffer[i];
+                }
+            } else {
+                label = "";
+            }
+            xPos += xStep;
+        }
         unsigned int index = 0;
         ofNoFill();
         for(unsigned int n=0; n<numDimensions; n++){
