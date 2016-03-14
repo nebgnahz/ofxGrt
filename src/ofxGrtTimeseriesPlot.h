@@ -88,6 +88,8 @@ public:
         }
     }
 
+    bool setChannelNames(const vector<string>& channel_names);
+
     /**
      @brief gets the range information of the actual plot data.
      @returns returns the range information (minimum to maximum) in std::pair.

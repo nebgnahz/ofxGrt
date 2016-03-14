@@ -230,7 +230,7 @@ bool ofxGrtTimeseriesPlot::update( const vector<float> &data, bool highlight, st
     dataBuffer.push_back( data );
     highlightBuffer.push_back( highlight );
     labelBuffer.push_back( label );
-    
+
 
     //Check the min and max values
     for(unsigned int n=0; n<numDimensions; n++){
@@ -398,5 +398,14 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
 
     ofPopMatrix();
 
+    return true;
+}
+
+bool ofxGrtTimeseriesPlot::setChannelNames(const vector<string>& channel_names) {
+    if (channel_names.size() != numDimensions) {
+        return false;
+    }
+
+    channelNames = channel_names;
     return true;
 }
