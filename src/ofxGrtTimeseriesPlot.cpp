@@ -267,6 +267,8 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
 
     //Draw the grid if required
     if( drawGrid ){
+        ofPushStyle();
+        ofSetLineWidth(1);
         ofSetColor(gridColor[0],gridColor[1],gridColor[2],gridColor[3]);
         unsigned int numVLines = 20;
         unsigned int numHLines = 10;
@@ -288,10 +290,11 @@ bool ofxGrtTimeseriesPlot::draw(unsigned int x,unsigned int y,unsigned int w,uns
             float yEnd = h;
             ofDrawLine(xStart,yStart,xEnd,yEnd);
         }
+        ofPopStyle();
     }
 
     //Draw the axis lines
-    ofSetColor(255,255,255);
+    ofSetColor(gridColor[0],gridColor[1],gridColor[2]);
     ofDrawLine(-5,h,w+5,h); //X Axis
     ofDrawLine(0,-5,0,h+5); //Y Axis
 

@@ -101,6 +101,18 @@ public:
     */
     std::pair<float, float> getDefaultRanges() { return std::make_pair(defaultMinY, defaultMaxY); }
 
+    void setBackgroundColor(ofColor color) {
+        backgroundColor = color;
+    }
+    
+    void setTextColor(ofColor color) {
+        textColor = color;
+    }
+    
+    void setGridColor(ofColor color) {
+        gridColor = color;
+    }
+
 protected:
     unsigned int numDimensions;
     unsigned int timeseriesLength;
