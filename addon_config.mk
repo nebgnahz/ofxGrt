@@ -23,20 +23,20 @@ meta:
 
 common:
 	ADDON_INCLUDES = src
-	ADDON_INCLUDES += libs/grt
-	ADDON_SOURCES_EXCLUDE = libs/grt/build/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/data/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/docs/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/examples/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/extensions/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/gui/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/jni/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/tests/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/third_party/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/tools/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/website/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/wiki/%
-	ADDON_SOURCES_EXCLUDE += libs/grt/website/%
+#	ADDON_INCLUDES += libs/grt
+#	ADDON_SOURCES_EXCLUDE = libs/grt/build/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/data/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/docs/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/examples/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/extensions/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/gui/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/jni/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/tests/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/third_party/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/tools/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/website/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/wiki/%
+#	ADDON_SOURCES_EXCLUDE += libs/grt/website/%
 
 	# Uncomment the lines below to use the system installed GRT headers and libs
 	# ADDON_INCLUDES += /usr/local/include/GRT
